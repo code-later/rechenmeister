@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class Rechenmeister
+  CHEAT_MODE = "tzx"
+
   def initialize
     @current_round = 0
     @score = 0
@@ -24,6 +26,10 @@ class Rechenmeister
   def select_name
     print "Wie ist denn dein Name? "
     @name = gets.strip
+
+    if @name == CHEAT_MODE && ENV["CHEAT"]
+      @cheat_mode = true
+    end
 
     puts
     puts "Hallo #{@name}, dann lass mal ein bisschen rechnen :)"
@@ -126,8 +132,16 @@ class Rechenmeister
     first, second = first_and_second_number
 
     print "Deine Aufgabe ist: #{first} #{@op} #{second} = "
-    while (result = gets.strip.to_i) != first.send(@op, second) do
-      print "Das war leider falsch. Probier es doch nochmal: #{first} #{@op} #{second} = "
+    while result = gets.strip
+      if @cheat_mode
+        result = eval(result)
+      end
+
+      if result.to_i == first.send(@op, second)
+        break
+      else
+        print "Das war leider falsch. Probier es doch nochmal: #{first} #{@op} #{second} = "
+      end
     end
     puts "#{result} ist richtig. Weiter so!"
     @score += 1
