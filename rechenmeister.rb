@@ -50,23 +50,23 @@ class Rechenmeister
       @mode_name = "Addieren"
       @op = :+
       @range = [
-        (1...10).to_a,
-        (10...20).to_a,
+        (3...12).to_a,
+        (12...23).to_a,
         (15...25).to_a,
       ]
     when "2"
       @mode_name = "Substrahieren"
       @op = :-
       @range = [
-        (1...10).to_a,
-        (1...20).to_a,
-        (1...30).to_a,
+        (3...14).to_a,
+        (3...20).to_a,
+        (3...30).to_a,
       ]
     when "$"
       @mode_name = "Multiplizieren"
       @op = :*
       @range = [
-        (1...5).to_a,
+        (2...5).to_a,
         (3...7).to_a,
         (5...10).to_a,
       ]
@@ -101,7 +101,16 @@ class Rechenmeister
   end
 
   def finish
-    puts "Toll #{@name}, du hast #{@score} von #{@max_rounds} Punkten!"
+    duration = Time.now - @start_time
+
+    threshold = @max_rounds * 1.5
+
+    final_score = [
+      ((threshold / (duration/60)) * 15).round,
+      45
+    ].min
+
+    puts "Toll #{@name}, hast #{final_score} Spielminuten gewonnen!"
 
     exit
   end
@@ -127,6 +136,8 @@ class Rechenmeister
   end
 
   def start
+    @start_time = Time.now
+
     finish if @current_round >= @max_rounds
 
     first, second = first_and_second_number
