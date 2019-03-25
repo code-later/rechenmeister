@@ -3,6 +3,13 @@
 class Rechenmeister
   CHEAT_MODE = "tzx"
 
+  OP_CHAR = {
+    "*": "×",
+    "+": "+",
+    "-": "-",
+    "/": "÷"
+  }
+
   def initialize
     @current_round = 0
     @score = 0
@@ -41,8 +48,9 @@ class Rechenmeister
     puts "1) Addieren"
     puts "2) Substrahieren"
     puts "$) Multiplizieren"
+    puts "!) Dividieren"
     puts
-    print "Wähle 1, 2 oder $: "
+    print "Wähle 1, 2, $ oder !: "
     @mode = gets.strip
 
     case @mode
@@ -65,6 +73,14 @@ class Rechenmeister
     when "$"
       @mode_name = "Multiplizieren"
       @op = :*
+      @range = [
+        (2...5).to_a,
+        (3...7).to_a,
+        (5...10).to_a,
+      ]
+    when "!"
+      @mode_name = "Dividieren"
+      @op = :/
       @range = [
         (2...5).to_a,
         (3...7).to_a,
@@ -103,11 +119,11 @@ class Rechenmeister
   def finish
     duration = Time.now - @start_time
 
-    threshold = @max_rounds * 1.5
+    threshold = @max_rounds * 1.1
 
     final_score = [
       ((threshold / (duration/60)) * 15).round,
-      45
+      50
     ].min
 
     puts "Toll #{@name}, hast #{final_score} Spielminuten gewonnen!"
@@ -124,13 +140,16 @@ class Rechenmeister
       @range[0]
     end
 
-
     first = range.sample
     second = range.sample
 
     return [second, first] if @op == :- && first < second
 
     return [first - 10, second].shuffle if @op == :+ && first > 10 && second > 10
+
+    if @op == :/
+      return [first * second, [first, second].sample]
+    end
 
     [first, second]
   end
@@ -142,7 +161,7 @@ class Rechenmeister
 
     first, second = first_and_second_number
 
-    print "Deine Aufgabe ist: #{first} #{@op} #{second} = "
+    print "Deine Aufgabe ist: #{first} #{OP_CHAR[@op]} #{second} = "
     while result = gets.strip
       if @cheat_mode
         result = eval(result)
@@ -151,7 +170,7 @@ class Rechenmeister
       if result.to_i == first.send(@op, second)
         break
       else
-        print "Das war leider falsch. Probier es doch nochmal: #{first} #{@op} #{second} = "
+        print "Das war leider falsch. Probier es doch nochmal: #{first} #{OP_CHAR[@op]} #{second} = "
       end
     end
     puts "#{result} ist richtig. Weiter so!"
