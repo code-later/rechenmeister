@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 # frozen_string_literal: true
 
 class Rechenmeister
@@ -104,30 +106,30 @@ class Rechenmeister
       '1' => Add.new(
         name: "Addieren",
         ranges: [
-          (3...12).to_a,
-          (12...23).to_a,
-          (15...25).to_a,
+          (1...10).to_a,
+          (1...20).to_a,
+          (5...20).to_a,
         ]),
       '2' => Substract.new(
         name: "Substrahieren",
         ranges: [
-          [(3...14).to_a, (3...14).to_a],
-          [(3...23).to_a, (3...23).to_a],
-          [(3...20).to_a, (20...70).to_a]
+          [(1...10).to_a, (1...10).to_a],
+          [(1...20).to_a, (1...20).to_a],
+          [(5...20).to_a, (5...20).to_a]
         ]),
       '$' => Multiply.new(
         name: "Multiplizieren",
         ranges: [
-          (2...5).to_a,
-          (3...7).to_a,
-          (5...10).to_a,
+          (2...10).to_a,
+          (2...10).to_a,
+          (2...10).to_a,
         ]),
       "!" => Divide.new(
         name: "Dividieren",
         ranges: [
-          (2...5).to_a,
-          (3...7).to_a,
-          (5...10).to_a,
+          (2...10).to_a,
+          (2...10).to_a,
+          (2...10).to_a,
         ])
     }
 
@@ -194,6 +196,7 @@ class Rechenmeister
       puts
       choose_rounds
     else
+      @start_time = Time.now
       puts "Super #{@name}, dann rechnen wir #{@max_rounds} Runden. Auf geht es!"
       puts
     end
@@ -202,26 +205,34 @@ class Rechenmeister
   def finish
     duration = Time.now - @start_time
 
-    threshold = @max_rounds * 1
-
+    # 30 seconds for each excercise (round) before we start taking penalties
     final_score = [
-      ((threshold / (duration/60)) * 15).round,
-      50
+      ((@max_rounds * 30) / duration).round * 60,
+      # More rounds more achievable play time...
+      (@max_rounds * 2),
+      # ...but capped at 90 minutes
+      90
     ].min
+    
+    if final_score > 0
+      system "ponysay --pony rainbowsalute 'Toll #{@name}, du hast #{final_score} Spielminuten gewonnen!'"
+      puts
+    else
+      system "ponysay --pony rarityponder 'Schade #{@name}, du hast zu lange gebraucht. 5 Spielminuten gibt es als Trost <3'"
+      puts
+    end
 
-    system "ponysay --pony rainbowsalute 'Toll #{@name}, du hast #{final_score} Spielminuten gewonnen!'"
     puts
 
     exit
   end
 
   def start
-    @start_time = Time.now
-
     finish if @current_round >= @max_rounds
 
     first, second = @mode.operands(@current_round)
 
+    system "clear"
     print "Deine Aufgabe ist: #{first} #{OP_CHAR[@mode.op]} #{second} = "
     while result = gets.strip
       if @cheat_mode
